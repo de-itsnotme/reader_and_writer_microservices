@@ -5,6 +5,8 @@ services:
     volumes:
       - ./reader-service:/var/www
       - ./data:/var/www/var/imports # For host data folder
+      - ./reader-service/docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+
     working_dir: /var/www
     ports:
       - "8081:8000"
