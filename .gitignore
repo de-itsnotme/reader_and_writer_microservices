@@ -8,3 +8,6 @@
 *.log
 .idea/
 .DS_Store
+
+# Private notes
+notes/
