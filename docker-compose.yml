@@ -1,0 +1,20 @@
+services:
+  reader:
+    build: ./reader-service
+    container_name: reader_service
+    volumes:
+      - ./reader-service:/var/www
+    working_dir: /var/www
+    ports:
+      - "8081:8000"
+    command: php -S 0.0.0.0:8000 -t public
+
+  writer:
+    build: ./writer-service
+    container_name: writer_service
+    volumes:
+      - ./writer-service:/var/www
+    working_dir: /var/www
+    ports:
+      - "8082:8000"
+    command: php -S 0.0.0.0:8000 -t public
