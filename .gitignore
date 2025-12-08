@@ -1,0 +1,10 @@
+# Symfony / PHP
+/vendor/
+/var/
+.env.local
+.env.*.local
+
+# Docker
+*.log
+.idea/
+.DS_Store
