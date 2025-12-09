@@ -4,34 +4,33 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Csv;
 
-class CsvReader
+use Generator;
+use RuntimeException;
+
+final class CsvReader
 {
-    /**
-     * @param string $path Path to CSV file
-     *
-     * @return array<int, array<string, string>> Parsed rows as associative arrays
-     */
-    public function read(string $path): array
+    public function iterate(string $path): Generator
     {
-        $rows = [];
-        if (($handle = fopen($path, 'r')) !== false) {
-            $headers = fgetcsv($handle, 1000, ',');
-
-            if ($headers === false) {
-                fclose($handle);
-
-                return $rows;
-            }
-
-            while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-                $rows[] = array_combine($headers, $data);
-            }
-
-            fclose($handle);
+        if (!is_readable($path)) {
+            throw new RuntimeException("CSV file not found: $path");
         }
 
-        return $rows;
+        if (($handle = fopen($path, 'r')) === false) {
+            throw new RuntimeException("Cannot open CSV file: $path");
+        }
+
+        $headers = fgetcsv($handle);
+
+        if ($headers === false) {
+            fclose($handle);
+
+            return;
+        }
+
+        while (($row = fgetcsv($handle)) !== false) {
+            yield array_combine($headers, $row);
+        }
+
+        fclose($handle);
     }
-
-
 }

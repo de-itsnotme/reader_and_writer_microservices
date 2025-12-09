@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Domain\File\FileStorage;
-use App\Infrastructure\Csv\CsvReader;
+use App\Application\Import\ItemImportService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:import-items',
     description: 'Import items from a CSV file',
 )]
-class ImportItemsCommand extends Command
+final class ImportItemsCommand extends Command
 {
     public function __construct(
-        private readonly FileStorage $fileStorage,
-        private readonly CsvReader   $csvReader,
+        private ItemImportService $itemImportService,
     )
     {
         parent::__construct();
@@ -35,16 +32,10 @@ class ImportItemsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new SymfonyStyle($input, $output);
-        $filename = $input->getArgument('path');
+        $path = (string) $input->getArgument('path');
+        $this->itemImportService->import($path);
 
-        if (!$this->fileStorage->exists($filename)) {
-            $io->error('File not found: ' . $filename);
-        }
-
-        $rows = $this->csvReader->read($this->fileStorage->resolve($filename));
-
-        $io->success(sprintf('Parsed %d rows from %s', count($rows), $filename));
+        $output->writeln('<info>Import dispatched to writer-service.</info>');
 
         return Command::SUCCESS;
     }
