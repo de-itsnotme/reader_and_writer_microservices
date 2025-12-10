@@ -15,15 +15,15 @@ readonly class WriterHttpGateway implements WriterGateway
     )
     {
     }
-    public function sendItem(array $item): void
+    public function sendProduct(array $product): void
     {
-        $response = $this->httpClient->request('POST', $this->baseUrl . '/item', [
-            'json' => $item,
+        $response = $this->httpClient->request('POST', rtrim($this->baseUrl . '/products'), [
+            'json' => $product,
         ]);
 
         if ($response->getStatusCode() >= 400) {
             throw new \RuntimeException(
-                'Writer-service rejected the item. HTTP status code: %d' . $response->getStatusCode()
+                'Writer-service rejected the product. HTTP status code: %d' . $response->getStatusCode()
             );
         }
     }

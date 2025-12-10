@@ -24,4 +24,4 @@ services:
 
     App\Infrastructure\Http\WriterHttpGateway:
         arguments:
-            $baseUrl: '/var/www/var/imports'
+            $baseUrl: '%env(WRITER_BASE_URL)%'

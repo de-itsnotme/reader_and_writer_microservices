@@ -22,7 +22,7 @@ class WriterHttpGatewayTest extends TestCase
             ->method('request')
             ->with(
                 'POST',
-                'http://writer:8000/item',
+                'http://writer:8000/products',
                 $this->callback(function ($options) {
                     return isset($options['json']['foo']) && $options['json']['foo'] === 'bar';
                 })
@@ -31,7 +31,7 @@ class WriterHttpGatewayTest extends TestCase
 
         $gateway = new WriterHttpGateway($httpClient, 'http://writer:8000');
 
-        $gateway->sendItem(['foo' => 'bar']);
+        $gateway->sendProduct(['foo' => 'bar']);
 
         // No exception means success
         $this->assertTrue(true);
@@ -48,6 +48,6 @@ class WriterHttpGatewayTest extends TestCase
         $gateway = new WriterHttpGateway($httpClient, 'http://writer:8000');
 
         $this->expectException(\RuntimeException::class);
-        $gateway->sendItem(['foo' => 'bar']);
+        $gateway->sendProduct(['foo' => 'bar']);
     }
 }

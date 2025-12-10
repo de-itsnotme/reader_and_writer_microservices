@@ -7,7 +7,7 @@ namespace App\Application\Import;
 use App\Domain\Writer\WriterGateway;
 use App\Infrastructure\Csv\CsvReader;
 
-final class ItemImportService
+final class ProductImportService
 {
     public function __construct(
         private CsvReader $csvReader,
@@ -29,7 +29,7 @@ final class ItemImportService
                 'stock' => $row['stock'],
             ];
 
-            $this->writer->sendItem($payload);
+            $this->writer->sendProduct($payload);
         }
     }
 }

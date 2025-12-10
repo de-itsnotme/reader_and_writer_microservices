@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Application\Import;
 
-use App\Application\Import\ItemImportService;
+use App\Application\Import\ProductImportService;
 use App\Domain\Writer\WriterGateway;
 use App\Infrastructure\Csv\CsvReader;
 use PHPUnit\Framework\TestCase;
@@ -31,12 +31,12 @@ class ItemImportServiceTest extends TestCase
         $captured = [];
 
         $writerMock->expects($this->exactly(2))
-            ->method('sendItem')
+            ->method('sendProduct')
             ->willReturnCallback(function ($payload) use (&$captured) {
                 $captured[] = $payload;
             });
 
-        $service = new ItemImportService(new CsvReader(), $writerMock);
+        $service = new ProductImportService(new CsvReader(), $writerMock);
         $service->import($this->csvFile);
 
         $this->assertSame([
