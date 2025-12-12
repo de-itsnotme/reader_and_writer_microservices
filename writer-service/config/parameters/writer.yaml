@@ -1,0 +1,12 @@
+writer.storage:
+    type: mysql
+    mysql:
+        host: db
+        port: 3306
+        database: products_db
+        user: root
+        password: secret
+    # json:
+    #   path: '%kernel.project_dir%/var/storage/products.json'
+    # xml:
+    #   path: '%kernel.project_dir%/var/storage/products.xml'

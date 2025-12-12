@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cbf2dbe18bfb601bdd4e6cafa3b627a9",
+    "content-hash": "02757579011d67bce2e24130a3607d57",
     "packages": [
         {
             "name": "psr/cache",
@@ -3039,16 +3039,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.2",
+            "version": "12.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "06713c2633d6d832f2fe98a70511ecaa7cb92c1a"
+                "reference": "6dc2e076d09960efbb0c1272aa9bc156fc80955e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/06713c2633d6d832f2fe98a70511ecaa7cb92c1a",
-                "reference": "06713c2633d6d832f2fe98a70511ecaa7cb92c1a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6dc2e076d09960efbb0c1272aa9bc156fc80955e",
+                "reference": "6dc2e076d09960efbb0c1272aa9bc156fc80955e",
                 "shasum": ""
             },
             "require": {
@@ -3116,7 +3116,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.2"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.3"
             },
             "funding": [
                 {
@@ -3140,7 +3140,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-08T07:22:32+00:00"
+            "time": "2025-12-11T08:52:59+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -4150,7 +4150,8 @@
     "platform": {
         "php": ">=8.4",
         "ext-ctype": "*",
-        "ext-iconv": "*"
+        "ext-iconv": "*",
+        "ext-pdo": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"

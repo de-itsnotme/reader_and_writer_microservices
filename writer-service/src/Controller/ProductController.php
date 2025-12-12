@@ -4,34 +4,41 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Application\Product\ProductService;
+use App\Application\ProductService;
+use App\Domain\Product;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-class ProductController
+final readonly class ProductController
 {
-    public function __construct(private readonly ProductService $productService)
+    public function __construct(private ProductService $productService)
     {
     }
 
     #[Route('/products', name: 'create_product', methods: ['POST'])]
-    public function __invoke(Request $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $payload = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-        if (!is_array($payload)) {
-            return new JsonResponse(['error' => 'invalid json'], 400);
+        foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
+            if (!isset($data[$key])) {
+                return new JsonResponse(['error' => "Missing field: {$key}"], 400);
+            }
         }
 
-        try {
-            $this->productService->create($payload);
-        } catch (\InvalidArgumentException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 422);
-        } catch (\Throwable $e) {
-            return new JsonResponse(['error' => 'Internal error'], 500);
-        }
+        $product = new Product(
+            (string) $data['gtin'],
+            (string) $data['language'],
+            (string) $data['title'],
+            (string) $data['picture'],
+            (string) $data['description'],
+            (float) $data['price'],
+            (int) $data['stock'],
+        );
 
-        return new JsonResponse(['status' => 'accepted'], 202);
+        $this->productService->import($product);
+
+        return new JsonResponse(['status' => 'ok'], 201);
     }
 }
