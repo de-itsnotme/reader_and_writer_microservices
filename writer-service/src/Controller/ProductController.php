@@ -19,13 +19,12 @@ final readonly class ProductController
     #[Route('/products', name: 'create_product', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $productsData = json_decode($request->getContent(), true);
 
-        if (!isset($data['products']) || !is_array($data['products'])) {
-            return new JsonResponse(['error' => 'The "products" field must be an array'], 400);
+        if (!isset($productsData[0]) || !is_array($productsData[0])) {
+            return new JsonResponse(['error' => 'The data must must contain one or more rows of Product'], 400);
         }
 
-        $productsData = $data['products'];
         $processed = 0;
 
         foreach ($productsData as $item) {
