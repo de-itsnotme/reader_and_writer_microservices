@@ -6,5 +6,5 @@ namespace App\Domain\Writer;
 
 interface WriterGateway
 {
-    public function sendProduct(array $product): void;
+    public function sendBulkProducts(array $products): void;
 }

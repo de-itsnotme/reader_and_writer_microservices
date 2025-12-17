@@ -18,8 +18,10 @@ final class ProductImportService
 
     public function import(string $path): void
     {
+        $payloads = [];
+
         foreach ($this->csvReader->iterate($path) as $row) {
-            $payload = [
+            $payloads[] = [
                 'gtin' => $row['gtin'],
                 'language' => $row['language'],
                 'title' => $row['title'],
@@ -28,8 +30,8 @@ final class ProductImportService
                 'price' => $row['price'],
                 'stock' => $row['stock'],
             ];
-
-            $this->writer->sendProduct($payload);
         }
+
+        $this->writer->sendBulkProducts($payloads);
     }
 }

@@ -30,10 +30,10 @@ class ItemImportServiceTest extends TestCase
 
         $captured = [];
 
-        $writerMock->expects($this->exactly(2))
-            ->method('sendProduct')
+        $writerMock->expects($this->exactly(1))
+            ->method('sendBulkProducts')
             ->willReturnCallback(function ($payload) use (&$captured) {
-                $captured[] = $payload;
+                $captured = $payload;
             });
 
         $service = new ProductImportService(new CsvReader(), $writerMock);
