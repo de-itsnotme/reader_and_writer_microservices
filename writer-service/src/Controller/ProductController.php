@@ -21,24 +21,40 @@ final readonly class ProductController
     {
         $data = json_decode($request->getContent(), true);
 
-        foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
-            if (!isset($data[$key])) {
-                return new JsonResponse(['error' => "Missing field: {$key}"], 400);
-            }
+        if (!isset($data['products']) || !is_array($data['products'])) {
+            return new JsonResponse(['error' => 'The "products" field must be an array'], 400);
         }
 
-        $product = new Product(
-            (string) $data['gtin'],
-            (string) $data['language'],
-            (string) $data['title'],
-            (string) $data['picture'],
-            (string) $data['description'],
-            (float) $data['price'],
-            (int) $data['stock'],
+        $productsData = $data['products'];
+        $processed = 0;
+
+        foreach ($productsData as $item) {
+            foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
+                if (!isset($item[$key])) {
+                    return new JsonResponse(['error' => "Missing field: {$key}"], 400);
+                }
+            }
+
+            $product = new Product(
+                (string) $item['gtin'],
+                (string) $item['language'],
+                (string) $item['title'],
+                (string) $item['picture'],
+                (string) $item['description'],
+                (float) $item['price'],
+                (int) $item['stock'],
+            );
+
+            $this->productService->import($product);
+            $processed++;
+        }
+
+        return new JsonResponse(
+            [
+            'status' => 'ok',
+            'processed' => $processed,
+            ],
+            201
         );
-
-        $this->productService->import($product);
-
-        return new JsonResponse(['status' => 'ok'], 201);
     }
 }
