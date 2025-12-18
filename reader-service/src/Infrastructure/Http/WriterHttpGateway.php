@@ -15,7 +15,7 @@ readonly class WriterHttpGateway implements WriterGateway
     )
     {
     }
-    public function sendBulkProducts(array $products): void
+    public function sendBulk(array $products): void
     {
         $response = $this->httpClient->request('POST', rtrim($this->baseUrl . '/products'), [
             'json' => $products,

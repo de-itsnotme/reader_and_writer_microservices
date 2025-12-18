@@ -31,7 +31,7 @@ class ItemImportServiceTest extends TestCase
         $captured = [];
 
         $writerMock->expects($this->exactly(1))
-            ->method('sendBulkProducts')
+            ->method('sendBulk')
             ->willReturnCallback(function ($payload) use (&$captured) {
                 $captured = $payload;
             });

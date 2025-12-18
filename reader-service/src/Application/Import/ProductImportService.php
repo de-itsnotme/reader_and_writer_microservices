@@ -32,6 +32,6 @@ final class ProductImportService
             ];
         }
 
-        $this->writer->sendBulkProducts($payloads);
+        $this->writer->sendBulk($payloads);
     }
 }

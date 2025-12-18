@@ -31,7 +31,7 @@ class WriterHttpGatewayTest extends TestCase
 
         $gateway = new WriterHttpGateway($httpClient, 'http://writer:8000');
 
-        $gateway->sendBulkProducts(['foo' => 'bar']);
+        $gateway->sendBulk(['foo' => 'bar']);
 
         // No exception means success
         $this->assertTrue(true);
@@ -48,6 +48,6 @@ class WriterHttpGatewayTest extends TestCase
         $gateway = new WriterHttpGateway($httpClient, 'http://writer:8000');
 
         $this->expectException(\RuntimeException::class);
-        $gateway->sendBulkProducts(['foo' => 'bar']);
+        $gateway->sendBulk(['foo' => 'bar']);
     }
 }
