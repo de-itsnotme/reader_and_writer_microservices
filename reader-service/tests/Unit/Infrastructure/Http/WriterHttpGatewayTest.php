@@ -24,7 +24,7 @@ class WriterHttpGatewayTest extends TestCase
                 'POST',
                 'http://writer:8000/products',
                 $this->callback(function ($options) {
-                    return isset($options['json']['foo']) && $options['json']['foo'] === 'bar';
+                    return isset($options['json']['products']['foo']) && $options['json']['products']['foo'] === 'bar';
                 })
             )
             ->willReturn($response);

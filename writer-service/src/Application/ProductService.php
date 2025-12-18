@@ -7,7 +7,7 @@ namespace App\Application;
 use App\Domain\Product;
 use App\Domain\ProductRepositoryInterface;
 
-final readonly class ProductService
+readonly class ProductService
 {
     public function __construct(private ProductRepositoryInterface $repository)
     {

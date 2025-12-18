@@ -21,14 +21,14 @@ final readonly class ProductController
     {
         $productsData = json_decode($request->getContent(), true);
 
-        if (!isset($productsData[0]) || !is_array($productsData[0])) {
+        if (!isset($productsData['products']) || !is_array($productsData['products'])) {
             return new JsonResponse(['error' => 'The data must must contain one or more rows of Product'], 400);
         }
 
         $processed = 0;
         $products = [];
 
-        foreach ($productsData as $item) {
+        foreach ($productsData['products'] as $item) {
             foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
                 if (!isset($item[$key])) {
                     return new JsonResponse(['error' => "Missing field: {$key}"], 400);

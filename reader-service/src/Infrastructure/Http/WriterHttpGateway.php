@@ -18,7 +18,9 @@ readonly class WriterHttpGateway implements WriterGateway
     public function sendBulk(array $products): void
     {
         $response = $this->httpClient->request('POST', rtrim($this->baseUrl . '/products'), [
-            'json' => $products,
+            'json' => [
+                'products' => $products,
+            ]
         ]);
 
         if ($response->getStatusCode() >= 400) {
