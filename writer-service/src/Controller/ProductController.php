@@ -26,6 +26,7 @@ final readonly class ProductController
         }
 
         $processed = 0;
+        $products = [];
 
         foreach ($productsData as $item) {
             foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
@@ -34,7 +35,7 @@ final readonly class ProductController
                 }
             }
 
-            $product = new Product(
+            $products[] = new Product(
                 (string) $item['gtin'],
                 (string) $item['language'],
                 (string) $item['title'],
@@ -44,9 +45,10 @@ final readonly class ProductController
                 (int) $item['stock'],
             );
 
-            $this->productService->import($product);
             $processed++;
         }
+
+        $this->productService->importBulk($products);
 
         return new JsonResponse(
             [

@@ -7,14 +7,21 @@ namespace App\Application;
 use App\Domain\Product;
 use App\Domain\ProductRepositoryInterface;
 
-final class ProductService
+final readonly class ProductService
 {
     public function __construct(private ProductRepositoryInterface $repository)
     {
     }
 
-    public function import(Product $product): void
+    /**
+     * @param array<int, Product> $products
+     *
+     * @return void
+     */
+    public function importBulk(array $products): void
     {
-        $this->repository->save($product);
+        foreach ($products as $product) {
+            $this->repository->save($product);
+        }
     }
 }
