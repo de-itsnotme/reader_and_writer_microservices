@@ -25,3 +25,38 @@ services:
     App\Infrastructure\Http\WriterHttpGateway:
         arguments:
             $baseUrl: '%env(WRITER_BASE_URL)%'
+
+    App\Application\Messaging\PublisherRegistry:
+        calls:
+            - [add, ['http', '@App\Infrastructure\Messaging\HttpProductImportPublisher']]
+            - [ add, [ 'rabbitmq', '@App\Infrastructure\Messaging\RabbitMqProductImportPublisher' ] ]
+            # - [add, ['sqs', '@App\Infrastructure\Messaging\SqsProductImportPublisher']]
+
+    App\Infrastructure\Messaging\HttpProductImportPublisher:
+        arguments:
+            $client: '@http_client'
+            $writerBaseUri: '%env(WRITER_BASE_URL)%'
+
+    App\Application\Messaging\ProductImportPublisher:
+        alias: App\Application\Messaging\TransportSelectorPublisher
+
+    App\Infrastructure\Messaging\EnvTransportProvider:
+        arguments:
+            $transportKey: '%env(MESSAGE_TRANSPORT)%'
+
+    App\Application\Messaging\TransportProvider:
+        alias: App\Infrastructure\Messaging\EnvTransportProvider
+
+    app.rabbitmq.connection:
+        class: PhpAmqpLib\Connection\AMQPStreamConnection
+        arguments:
+            - '%env(RABBITMQ_HOST)%'
+            - '%env(int:RABBITMQ_PORT)%'
+            - '%env(RABBITMQ_USER)%'
+            - '%env(RABBITMQ_PASSWORD)%'
+
+    App\Infrastructure\Messaging\RabbitMqProductImportPublisher:
+        arguments:
+            $connection: '@app.rabbitmq.connection'
+            $exchangeName: '%env(RABBITMQ_EXCHANGE)%'
+            $routingKey: '%env(RABBITMQ_ROUTING_KEY)%'

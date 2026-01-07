@@ -4,24 +4,25 @@ declare(strict_types=1);
 
 namespace App\Application\Import;
 
-use App\Domain\Writer\WriterGateway;
+use App\Application\Messaging\ProductImportMessage;
+use App\Application\Messaging\ProductImportPublisher;
 use App\Infrastructure\Csv\CsvReader;
+use DateTimeImmutable;
 
 final class ProductImportService
 {
     public function __construct(
         private CsvReader $csvReader,
-        private WriterGateway $writer,
-    )
-    {
+        private ProductImportPublisher $publisher,
+    ) {
     }
 
     public function import(string $path): void
     {
-        $payloads = [];
+        $products = [];
 
         foreach ($this->csvReader->iterate($path) as $row) {
-            $payloads[] = [
+            $products[] = [
                 'gtin' => $row['gtin'],
                 'language' => $row['language'],
                 'title' => $row['title'],
@@ -32,6 +33,13 @@ final class ProductImportService
             ];
         }
 
-        $this->writer->sendBulk($payloads);
+        $message = new ProductImportMessage(
+            products: $products,
+            batchId: uniqid('batch_', true),
+            source: 'reader-service',
+            importedAt: new DateTimeImmutable(),
+        );
+
+        $this->publisher->publish($message);
     }
 }
