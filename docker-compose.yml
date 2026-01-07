@@ -52,3 +52,20 @@ services:
       - "3307:3306"  # host:container; adjust if 3306 is taken on host
     volumes:
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - microservices
+
+networks:
+  microservices:
+    driver: bridge
+
