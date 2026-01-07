@@ -14,10 +14,21 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
+    app.publisher_registry:
+        class: App\Application\Messaging\PublisherRegistry
+        autowire: false
+        autoconfigure: false
+        public: true
+        calls:
+            - [ add, [ 'http', '@App\Infrastructure\Messaging\HttpProductImportPublisher' ] ]
+            - [ add, [ 'rabbitmq', '@App\Infrastructure\Messaging\RabbitMqProductImportPublisher' ] ]
+
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+        exclude:
+            - '../src/Application/Messaging/PublisherRegistry.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -26,16 +37,9 @@ services:
         arguments:
             $baseUrl: '%env(WRITER_BASE_URL)%'
 
-    App\Application\Messaging\PublisherRegistry:
-        calls:
-            - [add, ['http', '@App\Infrastructure\Messaging\HttpProductImportPublisher']]
-            - [ add, [ 'rabbitmq', '@App\Infrastructure\Messaging\RabbitMqProductImportPublisher' ] ]
-            # - [add, ['sqs', '@App\Infrastructure\Messaging\SqsProductImportPublisher']]
-
-    App\Infrastructure\Messaging\HttpProductImportPublisher:
+    App\Application\Messaging\TransportSelectorPublisher:
         arguments:
-            $client: '@http_client'
-            $writerBaseUri: '%env(WRITER_BASE_URL)%'
+            $registry: '@app.publisher_registry'
 
     App\Application\Messaging\ProductImportPublisher:
         alias: App\Application\Messaging\TransportSelectorPublisher
@@ -49,13 +53,20 @@ services:
 
     app.rabbitmq.connection:
         class: PhpAmqpLib\Connection\AMQPStreamConnection
+        lazy: true
         arguments:
             - '%env(RABBITMQ_HOST)%'
             - '%env(int:RABBITMQ_PORT)%'
             - '%env(RABBITMQ_USER)%'
             - '%env(RABBITMQ_PASSWORD)%'
 
+    App\Infrastructure\Messaging\HttpProductImportPublisher:
+        arguments:
+            $client: '@http_client'
+            $writerBaseUri: '%env(WRITER_BASE_URL)%'
+
     App\Infrastructure\Messaging\RabbitMqProductImportPublisher:
+        lazy: true
         arguments:
             $connection: '@app.rabbitmq.connection'
             $exchangeName: '%env(RABBITMQ_EXCHANGE)%'

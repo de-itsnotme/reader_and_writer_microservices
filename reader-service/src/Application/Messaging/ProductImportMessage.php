@@ -15,6 +15,26 @@ class ProductImportMessage
     ) {
     }
 
+    public function products(): array
+    {
+        return $this->products;
+    }
+
+    public function batchId(): string
+    {
+        return $this->batchId;
+    }
+
+    public function source(): string
+    {
+        return $this->source;
+    }
+
+    public function importedAt(): \DateTimeImmutable
+    {
+        return $this->importedAt;
+    }
+
     public function toArray(): array
     {
         return [
