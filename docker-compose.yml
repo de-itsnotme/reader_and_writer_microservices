@@ -63,9 +63,9 @@ services:
     networks:
       - microservices
 
-  rabbitmq:
+  rabbitmq_broker:
     image: rabbitmq:3.12-management
-    container_name: rabbitmq
+    container_name: rabbitmq_broker
     ports:
       - "5672:5672"   # AMQP
       - "15672:15672" # Management UI
