@@ -10,6 +10,7 @@ use App\Application\ProductService;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class ProductImportMessageHandlerTest extends TestCase
 {
@@ -18,15 +19,19 @@ class ProductImportMessageHandlerTest extends TestCase
     private AMQPChannel $channel;
     private ProductImportMessageHandler $handler;
 
+    private LoggerInterface $logger;
+
     protected function setUp(): void
     {
         $this->parser = $this->createMock(ProductImportMessageParser::class);
         $this->service = $this->createMock(ProductService::class);
         $this->channel = $this->createMock(AMQPChannel::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->handler = new ProductImportMessageHandler(
             $this->parser,
-            $this->service
+            $this->service,
+            $this->logger,
         );
     }
 

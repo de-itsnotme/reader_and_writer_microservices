@@ -26,7 +26,6 @@ class ProductImportConsumer
     public function consumeForever(): void
     {
         $channel = $this->setupInfrastructure();
-
         $callback = function (AMQPMessage $msg) use ($channel) {
             $this->handler->handle($msg, $channel);
         };
@@ -41,11 +40,13 @@ class ProductImportConsumer
             $callback
         );
 
-        while ($channel->is_consuming) {
+        // Loop as long as there are active consumers
+        while (!empty($channel->callbacks)) {
             try {
                 $channel->wait(null, false, 60);
             } catch (AMQPTimeoutException) {
-                // continue waiting
+                // No message in 60 seconds → continue waiting
+                continue;
             }
         }
     }

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\RabbitMq;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use App\Application\Messaging\ProductImportConsumer;
+use App\Application\Messaging\ProductImportMessageHandler;
+use App\Application\Messaging\ProductImportMessageParser;
 use App\Application\ProductService;
 
 class ProductImportConsumerTest extends KernelTestCase
@@ -27,6 +30,7 @@ class ProductImportConsumerTest extends KernelTestCase
 
         $channel = $this->connection->channel();
 
+        // Clean queues before each test
         $channel->queue_delete($_ENV['RABBITMQ_DLQ']);
         $channel->queue_delete($_ENV['RABBITMQ_QUEUE_PRODUCT_IMPORT_WRITER']);
     }
@@ -40,6 +44,15 @@ class ProductImportConsumerTest extends KernelTestCase
         $productService->expects($this->once())
             ->method('importBulk');
 
+        // Mock Logger
+        $logger = $this->createMock(LoggerInterface::class);
+
+        // Real parser
+        $parser = new ProductImportMessageParser();
+
+        // Real handler with mocked service
+        $handler = new ProductImportMessageHandler($parser, $productService, $logger);
+
         // Create consumer
         $consumer = new ProductImportConsumer(
             $this->connection,
@@ -48,7 +61,7 @@ class ProductImportConsumerTest extends KernelTestCase
             $_ENV['RABBITMQ_QUEUE_PRODUCT_IMPORT_WRITER'],
             $_ENV['RABBITMQ_DLX'],
             $_ENV['RABBITMQ_DLQ'],
-            $productService
+            $handler
         );
 
         // 1) Force infrastructure creation
@@ -87,6 +100,18 @@ class ProductImportConsumerTest extends KernelTestCase
     {
         $channel = $this->connection->channel();
 
+        // Real parser
+        $parser = new ProductImportMessageParser();
+
+        // Real ProductService (autowired)
+        $productService = static::getContainer()->get(ProductService::class);
+
+        // Mock Logger
+        $logger = $this->createMock(LoggerInterface::class);
+
+        // Real handler
+        $handler = new ProductImportMessageHandler($parser, $productService, $logger);
+
         // Create consumer
         $consumer = new ProductImportConsumer(
             $this->connection,
@@ -95,7 +120,7 @@ class ProductImportConsumerTest extends KernelTestCase
             $_ENV['RABBITMQ_QUEUE_PRODUCT_IMPORT_WRITER'],
             $_ENV['RABBITMQ_DLX'],
             $_ENV['RABBITMQ_DLQ'],
-            static::getContainer()->get(ProductService::class)
+            $handler
         );
 
         // 1) Force infrastructure creation
