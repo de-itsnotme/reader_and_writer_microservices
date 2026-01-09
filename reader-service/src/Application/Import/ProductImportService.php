@@ -9,7 +9,7 @@ use App\Application\Messaging\ProductImportPublisher;
 use App\Infrastructure\Csv\CsvReader;
 use DateTimeImmutable;
 
-final class ProductImportService
+class ProductImportService
 {
     public function __construct(
         private CsvReader $csvReader,

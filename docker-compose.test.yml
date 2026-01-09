@@ -1,0 +1,16 @@
+services:
+  rabbitmq_test:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq_test
+    networks:
+      - microservices
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+networks:
+  microservices:
+    driver: bridge
