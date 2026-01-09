@@ -9,20 +9,28 @@ use App\Application\Messaging\ProductImportPublisher;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-class RabbitMqProductImportPublisher implements ProductImportPublisher
+readonly class RabbitMqProductImportPublisher implements ProductImportPublisher
 {
     public function __construct(
         private AMQPStreamConnection $connection,
-        private string $exchangeName,
-        private string $routingKey,
+        private string               $exchangeName,
+        private string               $routingKey,
     ) {
     }
 
     public function publish(ProductImportMessage $message): void
     {
         $channel = $this->connection->channel();
-        $payload = json_encode($message->toArray(), JSON_THROW_ON_ERROR);
 
+        $channel->exchange_declare(
+            $this->exchangeName,
+            'topic',
+            false,
+            true,
+            false
+        );
+
+        $payload = json_encode($message->toArray(), JSON_THROW_ON_ERROR);
         $amqpMessage = new AMQPMessage(
             $payload,
             ['content_type' => 'application/json']
