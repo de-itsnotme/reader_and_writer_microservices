@@ -9,6 +9,8 @@ services:
     working_dir: /var/www
     expose:
       - "9000"   # php-fpm listens internally
+    networks:
+      - microservices
 
   reader_nginx:
     image: nginx:latest
@@ -20,6 +22,8 @@ services:
       - "8081:80"
     depends_on:
       - reader
+    networks:
+      - microservices
 
   writer:
     build: ./writer-service
@@ -30,6 +34,8 @@ services:
     working_dir: /var/www
     expose:
       - "9000"
+    networks:
+      - microservices
 
   writer_nginx:
     image: nginx:latest
@@ -41,6 +47,8 @@ services:
       - "8082:80"
     depends_on:
       - writer
+    networks:
+      - microservices
 
   db:
     image: mysql:8.0
@@ -52,6 +60,8 @@ services:
       - "3307:3306"  # host:container; adjust if 3306 is taken on host
     volumes:
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservices
 
   rabbitmq:
     image: rabbitmq:3.12-management
