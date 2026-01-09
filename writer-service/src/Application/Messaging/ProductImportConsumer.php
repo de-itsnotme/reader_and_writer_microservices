@@ -7,6 +7,8 @@ namespace App\Application\Messaging;
 use App\Application\ProductService;
 use App\Domain\Product;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -47,6 +49,7 @@ class ProductImportConsumer
                     foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
                         if (!isset($item[$key])) {
                             echo "Invalid product: missing field {$key}\n";
+
                             return;
                         }
                     }
@@ -67,7 +70,7 @@ class ProductImportConsumer
                 printf(
                     "Imported %d products via AMQP (Timestamp: %s)\n",
                     count($products),
-                    time()
+                    date('Y-m-d H:i:s', time())
                 );
 
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
@@ -79,13 +82,25 @@ class ProductImportConsumer
             }
         };
 
+        $channel->basic_consume(
+            $this->queueName,
+            '',
+            false,
+            false, // manual ack
+            false,
+            false,
+            $callback
+        );
 
-        while ($channel->is_open()) {
+        while (true) {
             try {
                 $channel->wait(null, false, 60);
-            } catch (AMQPTimeoutException $e) {
+            } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $e) {
                 // No messages in 60 seconds — continue waiting
                 continue;
+            } catch (\Exception $e) {
+                echo "Consumer stopped due to error: " . $e->getMessage() . "\n";
+                break;
             }
         }
     }
