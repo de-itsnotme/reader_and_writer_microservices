@@ -60,6 +60,8 @@ services:
             $exchangeName: '%env(RABBITMQ_EXCHANGE)%'
             $routingKey: '%env(RABBITMQ_ROUTING_KEY)%'
             $queueName: '%env(RABBITMQ_QUEUE_PRODUCT_IMPORT_WRITER)%'
+            $rabbitMqDlx: '%env(RABBITMQ_DLX)%'
+            $rabbitMqDlq: '%env(RABBITMQ_DLQ)%'
             $productService: '@App\Application\ProductService'
 
 

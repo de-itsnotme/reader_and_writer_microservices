@@ -7,19 +7,18 @@ namespace App\Application\Messaging;
 use App\Application\ProductService;
 use App\Domain\Product;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Exception\AMQPChannelClosedException;
-use PhpAmqpLib\Exception\AMQPConnectionClosedException;
-use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class ProductImportConsumer
 {
     public function __construct(
-        private AMQPStreamConnection $connection,
-        private string $exchangeName,
-        private string $routingKey,
-        private string $queueName,
-        private ProductService $productService,
+        private readonly AMQPStreamConnection $connection,
+        private readonly string               $exchangeName,
+        private readonly string               $routingKey,
+        private readonly string               $queueName,
+        private readonly string               $rabbitMqDlx,
+        private readonly string               $rabbitMqDlq,
+        private readonly ProductService       $productService,
     ) {
     }
 
@@ -28,8 +27,27 @@ class ProductImportConsumer
         $channel = $this->connection->channel();
 
         $channel->exchange_declare($this->exchangeName, 'topic', false, true, false);
-        $channel->queue_declare($this->queueName, false, true, false, false);
+        $channel->queue_declare(
+            $this->queueName,
+            false,
+            true,
+            false,
+            false,
+            false,
+            [
+                'x-dead-letter-exchange' => ['S', $this->rabbitMqDlx],
+            ]
+        );
         $channel->queue_bind($this->queueName, $this->exchangeName, $this->routingKey);
+
+        // 1. Declare the Dead Letter Exchange
+        $channel->exchange_declare($this->rabbitMqDlx, 'fanout', false, true, false);
+
+        // 2. Declare the Dead Letter Queue
+        $channel->queue_declare($this->rabbitMqDlq, false, true, false, false);
+
+        // 3. Bind DLQ to DLX
+        $channel->queue_bind($this->rabbitMqDlq, $this->rabbitMqDlx);
 
         $callback = function (AMQPMessage $msg): void {
             try {
