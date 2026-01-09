@@ -4,7 +4,7 @@ FROM php:8.4-fpm
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git unzip libicu-dev libpq-dev libzip-dev \
-    && docker-php-ext-install bcmath intl pdo pdo_mysql zip
+    && docker-php-ext-install bcmath intl pdo pdo_mysql sockets zip
 
 # Install Xdebug
 RUN pecl install xdebug \
