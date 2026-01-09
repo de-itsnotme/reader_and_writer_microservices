@@ -30,56 +30,57 @@ class ProductImportConsumer
         $channel->queue_bind($this->queueName, $this->exchangeName, $this->routingKey);
 
         $callback = function (AMQPMessage $msg): void {
-            $payload = $msg->body;
+            try {
+                $payload = $msg->body;
+                $data = json_decode($payload, true);
 
-            $data = json_decode($payload, true);
-
-            if (!isset($data['products']) || !is_array($data['products'])
-            ) {
-                echo 'Invalid message format: missing "products" array\n';
-            }
-
-            $products = [];
-
-            foreach ($data['products'] as $item) {
-                foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
-                    if (!isset($item[$key])) {
-                        echo "Invalid product: missing field {$key}\n";
-                        return;
-                    }
+                if (
+                    !isset($data['products'])
+                    || !is_array($data['products'])
+                ) {
+                    echo 'Invalid message format: missing "products" array\n';
                 }
 
-                $products[] = new Product(
-                    (string) $item['gtin'],
-                    (string) $item['language'],
-                    (string) $item['title'],
-                    (string) $item['picture'],
-                    (string) $item['description'],
-                    (float) $item['price'],
-                    (int) $item['stock'],
+                $products = [];
+
+                foreach ($data['products'] as $item) {
+                    foreach (['gtin','language','title','picture','description','price','stock'] as $key) {
+                        if (!isset($item[$key])) {
+                            echo "Invalid product: missing field {$key}\n";
+                            return;
+                        }
+                    }
+
+                    $products[] = new Product(
+                        (string) $item['gtin'],
+                        (string) $item['language'],
+                        (string) $item['title'],
+                        (string) $item['picture'],
+                        (string) $item['description'],
+                        (float) $item['price'],
+                        (int) $item['stock'],
+                    );
+                }
+
+                $this->productService->importBulk($products);
+
+                printf(
+                    "Imported %d products via AMQP (Timestamp: %s)\n",
+                    count($products),
+                    time()
                 );
+
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            } catch (\Throwable $e) {
+                echo 'Error processing message: ' . $e->getMessage() . "\n";
+
+                // NACK + requeue
+                $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag'], false, true);
             }
-
-            $this->productService->importBulk($products);
-
-            printf(
-                "Imported %d products via AMQP (Timestamp: %s)\n",
-                count($products),
-                time()
-            );
         };
 
-        $channel->basic_consume(
-            $this->queueName,
-            '',
-            false,
-            false,   // auto-ack for now; later we might do manual acks
-            false,
-            false,
-            $callback
-        );
 
-        while (true) {
+        while ($channel->is_open()) {
             try {
                 $channel->wait(null, false, 60);
             } catch (AMQPTimeoutException $e) {
