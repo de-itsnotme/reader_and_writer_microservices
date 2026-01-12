@@ -39,9 +39,11 @@ services:
 
     # Repository contract to factory
     App\Domain\ProductRepositoryInterface:
-        factory: [ 'App\Infrastructure\Factory\StorageFactory', 'create' ]
+        alias: App\Infrastructure\Doctrine\Repository\DoctrineProductRepository
+
+    App\Infrastructure\Doctrine\Repository\DoctrineProductRepository:
         arguments:
-            - '%writer.storage%'
+            $em: '@doctrine.orm.entity_manager'
 
     # RabbitMQ connection
     app.rabbitmq.connection:
